@@ -6,14 +6,19 @@ from aiogram.types import ReplyKeyboardMarkup
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from datetime import datetime
-from config import BOT_TOKEN
-
-
 from buttons import *
 
 
-
+from dotenv import load_dotenv
+import os
+load_dotenv()
+BOT_TOKEN  = os.getenv("BOT_TOKEN") 
 bot = Bot(token=BOT_TOKEN)
+
+ADMIN_ID = int(os.getenv("ADMIN_ID")) 
+
+
+
 dp = Dispatcher()
 
 class AnketaForm(StatesGroup):
@@ -28,7 +33,16 @@ class AnketaForm(StatesGroup):
     education_choice = State()
     confirmation = State()
 
+from aiogram.types import BotCommand
 
+async def set_default_commands(bot: Bot):
+    commands = [
+        BotCommand(command="start", description="Qaytadan boshlash"),
+        BotCommand(command="add", description="Formani to'ldirish"),
+        BotCommand(command="results", description="Natijalarni ko'rish"),
+        BotCommand(command="help", description="Yordam olish")
+    ]
+    await bot.set_my_commands(commands)
 
 
 @dp.message(CommandStart())
@@ -152,33 +166,6 @@ async def set_score(msg: types.Message, state: FSMContext):
 @dp.message(AnketaForm.confirmation, F.text == "Tasdiqlash | Confirm")
 async def final_confirmation(msg: types.Message, state: FSMContext):
     data = await state.get_data()
-        
-    from database import SessionLocal
-    from models import UserData
-
-
-    db = SessionLocal()
-    try:
-        new_user = UserData(
-            user_id=msg.from_user.id,
-            username=msg.from_user.username,
-            full_name=data.get("name"),
-            birthdate=data.get("birthdate"),
-            location=data.get("location"),
-            phone=data.get("phone"),
-            study_year=data.get("study_year"),
-            degree=data.get("degree"),
-            certificate=data.get("certificate"),
-            score=data.get("score") if data.get("score") else None
-        )
-        db.add(new_user)
-        await db.commit()
-    except Exception as e:
-        await msg.answer(f"❗️Ma'lumotlarni saqlashda xatolik yuz berdi: {e}")
-        db.rollback()
-    finally:
-        db.close()
-
 
     if data['certificate'] == "Yo'q/None":
         await msg.answer('''Hamkorligingiz uchun rahmat!\nUzr, bizni talablarimizga to'g'ri kelmadingiz ❌. Test natijalaringiz yetarli darajada emas, yoki o'quv yilingiz va maqsadlaringiz bizning talablarimizga mos tushmaydi.\n\nThank you for cooperation! Sorry, but you don't meet our requirements ❌. Either you have a low test score or your current education level and educational goals don't suit.''')
@@ -210,6 +197,9 @@ async def final_confirmation(msg: types.Message, state: FSMContext):
 
 # Ishga tushirish
 async def main():
+    await set_default_commands(bot)
+
+
     await dp.start_polling(bot)
 
 

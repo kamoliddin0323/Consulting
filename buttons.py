@@ -30,10 +30,11 @@ def phone():
 
 def education_menu():
     btns = [
-        [types.KeyboardButton(text="Maktabda o'qiyman | At high school")],
-        [types.KeyboardButton(text="Maktabni bitirganman | In a gap year")],
-        [types.KeyboardButton(text="Universitetda o'qiyman | At university")],
-        [types.KeyboardButton(text="Universitetni bitirganman | Graduated university")]
+        [types.KeyboardButton(text="Maktabda o'qiyman | At high school"),
+        types.KeyboardButton(text="Maktabni bitirganman | In a gap year")],
+
+        [types.KeyboardButton(text="Universitetda o'qiyman | At university"),
+        types.KeyboardButton(text="Universitetni bitirganman | Graduated university")]
     ]
     buttons = types.ReplyKeyboardMarkup(keyboard=btns, resize_keyboard=True)
     return buttons
@@ -41,8 +42,9 @@ def education_menu():
 
 def class_type():
     btns = [
-        [types.KeyboardButton(text="9-group")],
-        [types.KeyboardButton(text="10-group")],
+        [types.KeyboardButton(text="9-group"),
+        types.KeyboardButton(text="10-group")],
+        
         [types.KeyboardButton(text="11-group")]
     ]
     buttons = types.ReplyKeyboardMarkup(keyboard=btns, resize_keyboard=True)
@@ -52,10 +54,11 @@ def class_type():
 
 def course_type():
     btns = [
-        [types.KeyboardButton(text="1-course")],
-        [types.KeyboardButton(text="2-course")],
-        [types.KeyboardButton(text="3-course")],
-        [types.KeyboardButton(text="4-course")]
+        [types.KeyboardButton(text="1-course"),
+        types.KeyboardButton(text="2-course")],
+
+        [types.KeyboardButton(text="3-course"),
+        types.KeyboardButton(text="4-course")]
     ]
     buttons = types.ReplyKeyboardMarkup(keyboard=btns, resize_keyboard=True)
     return buttons
