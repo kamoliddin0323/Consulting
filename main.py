@@ -15,7 +15,7 @@ load_dotenv()
 BOT_TOKEN  = os.getenv("BOT_TOKEN") 
 bot = Bot(token=BOT_TOKEN)
 
-
+ADMIN_ID = int(os.getenv('ADMIN_AD'))
 
 
 dp = Dispatcher()
@@ -36,10 +36,7 @@ from aiogram.types import BotCommand
 
 async def set_default_commands(bot: Bot):
     commands = [
-        BotCommand(command="start", description="Qaytadan boshlash"),
-        BotCommand(command="add", description="Formani to'ldirish"),
-        BotCommand(command="results", description="Natijalarni ko'rish"),
-        BotCommand(command="help", description="Yordam olish")
+        BotCommand(command="start", description="Qaytadan boshlash")
     ]
     await bot.set_my_commands(commands)
 
@@ -58,7 +55,7 @@ async def anketa_start(msg: types.Message, state: FSMContext):
 async def set_name(msg: types.Message, state: FSMContext):
     await state.update_data(name=msg.text)
     await state.set_state(AnketaForm.birthdate)
-    await msg.answer("Iltimos, tug'ilgan yil, oy, va kuningizni kiriting!\nPlease, fill in your birthdate!")
+    await msg.answer("Iltimos, tug'ilgan yil, oy, va kuningizni kiriting!(2001.01.21)\nPlease, fill in your birthdate!")
 
 
 @dp.message(AnketaForm.birthdate)
@@ -166,12 +163,13 @@ async def set_score(msg: types.Message, state: FSMContext):
 async def final_confirmation(msg: types.Message, state: FSMContext):
     data = await state.get_data()
 
-    if data['certificate'] == "Yo'q/None":
+    if data['certificate'] == "Yo'q/None":  
         await msg.answer('''Hamkorligingiz uchun rahmat!\nUzr, bizni talablarimizga to'g'ri kelmadingiz ❌. Test natijalaringiz yetarli darajada emas, yoki o'quv yilingiz va maqsadlaringiz bizning talablarimizga mos tushmaydi.\n\nThank you for cooperation! Sorry, but you don't meet our requirements ❌. Either you have a low test score or your current education level and educational goals don't suit.''')
         await msg.answer('''Talablar:\n\n🎓 Bakalavrga hozirda 11-sinfda o’qiyotgan yoki maktabni bitirgan bo'lishingiz kerak.\nIELTS 5.5 or above\nDuolingo 100 or above\n\n🎓 Magistratura uchun esa hozirda bakalavrda 4-kursda o’qiyotgan yoki allaqachon universitetni bitirgan bo’lishingiz zarur.\nIELTS 6 or above\nDuolingo 105 or above''')
+        return
 
     degree = data['degree']
-    score1 = float(data['score'])
+    score1 = float(data.get('score', 0))
     study_year = data['study_year']
 
     if (degree == "Bakalavr | Bachelor's") and (( score1 >= 100.0 or score1 >= 5.5) and (( study_year == '11-group') or (study_year == "graduated school") )):
@@ -185,6 +183,17 @@ async def final_confirmation(msg: types.Message, state: FSMContext):
         await msg.answer('''Talablar:\n\n🎓 Bakalavrga hozirda 11-sinfda o’qiyotgan yoki maktabni bitirgan bo'lishingiz kerak.\nIELTS 5.5 or above\nDuolingo 100 or above\n\n🎓 Magistratura uchun esa hozirda bakalavrda 4-kursda o’qiyotgan yoki allaqachon universitetni bitirgan bo’lishingiz zarur.\nIELTS 6 or above\nDuolingo 105 or above''')
     
 
+    data = await state.get_data()
+    last_data = f'''Foydalanuvchi malumotlari:\n
+    Toliq ism/Full name - {data.get('name')}\n
+    Tug'ilgan yilingiz/Date of birth - {data.get('birthdate')}\n
+    Telefon raqamingiz/Phone Number - {data.get('phone')}\n
+    O'quv yilingiz/Study year - {data.get('study_year')}\n
+    Tanlangan daraja/Chosen degree - {data.get('degree')}\n
+    Test natijangiz/Test score - {data.get('certificate')} {data.get('score')}''' 
+    await bot.send_message(chat_id=ADMIN_ID ,text=last_data)
+    
+    
 @dp.message(AnketaForm.confirmation, F.text == "Tahrirlash | Edit")
 async def final_confirmation(msg: types.Message, state: FSMContext):
     await state.set_state(AnketaForm.name)
